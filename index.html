@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelly's F1 Command Center</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-card-hover: #1a1a25;
+            --border: #2a2a3a;
+            --text: #e8e8f0;
+            --text-muted: #8888aa;
+            --red-bull: #1e41ff;
+            --red-bull-glow: rgba(30, 65, 255, 0.3);
+            --ferrari: #e8002d;
+            --mclaren: #ff8000;
+            --mercedes: #27f4d2;
+            --racing-red: #e8002d;
+            --accent: #1e41ff;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --green: #00e676;
+            --yellow: #ffea00;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a1a 100%);
+            border-bottom: 2px solid var(--accent);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(30, 65, 255, 0.15);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .live-badge {
+            background: var(--racing-red);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            animation: pulse-live 2s infinite;
+            letter-spacing: 1px;
+            display: none;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            gap: 0;
+            padding: 0 2rem;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover { color: var(--text); background: var(--bg-card-hover); }
+        .nav-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Main */
+        .main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(30, 65, 255, 0.3);
+            box-shadow: 0 4px 20px rgba(30, 65, 255, 0.08);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        /* Grid layouts */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 1rem; }
+            .main { padding: 1rem; }
+            .nav-item { padding: 0.6rem 1rem; font-size: 0.8rem; }
+        }
+
+        /* Next Race Hero */
+        .next-race {
+            background: linear-gradient(135deg, #0f0f2a 0%, #1a1a40 50%, #0f0f2a 100%);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .next-race::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--red-bull-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .next-race-label {
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .next-race-name {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.3rem;
+        }
+
+        .next-race-circuit {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .countdown {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .countdown-item {
+            text-align: center;
+        }
+
+        .countdown-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .countdown-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 0.3rem;
+        }
+
+        /* Standings */
+        .standing-row {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .standing-row:hover { background: var(--bg-card-hover); border-radius: 8px; padding: 0.7rem; margin: 0 -0.5rem; }
+        .standing-row:last-child { border-bottom: none; }
+
+        .standing-pos {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 2.5rem;
+            text-align: center;
+        }
+
+        .pos-1 { color: var(--gold); }
+        .pos-2 { color: var(--silver); }
+        .pos-3 { color: var(--bronze); }
+
+        .standing-color {
+            width: 4px;
+            height: 28px;
+            border-radius: 2px;
+            margin-right: 0.8rem;
+        }
+
+        .standing-info { flex: 1; }
+        
+        .standing-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .standing-team {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .standing-points {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .standing-pts-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-left: 0.2rem;
+        }
+
+        /* Race Schedule */
+        .race-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .race-item:last-child { border-bottom: none; }
+
+        .race-round {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            width: 2.5rem;
+            text-align: center;
+        }
+
+        .race-flag {
+            font-size: 1.5rem;
+            margin: 0 0.8rem;
+        }
+
+        .race-info { flex: 1; }
+
+        .race-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .race-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .race-status {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .status-completed { background: rgba(0, 230, 118, 0.15); color: var(--green); }
+        .status-upcoming { background: rgba(30, 65, 255, 0.15); color: var(--accent); }
+        .status-next { background: rgba(232, 0, 45, 0.15); color: var(--racing-red); animation: pulse-live 2s infinite; }
+
+        /* Verstappen Hero */
+        .driver-hero {
+            background: linear-gradient(135deg, #0a0a2a, #1e41ff15);
+            border: 1px solid var(--red-bull);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .driver-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--accent);
+            opacity: 0.8;
+            line-height: 1;
+        }
+
+        .driver-details h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .driver-details .team {
+            color: var(--accent);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .driver-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.8rem;
+        }
+
+        .driver-stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .driver-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Fun Facts */
+        .fun-fact {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-card-hover);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-box-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-box-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div>
+                <div class="logo">F1 HQ</div>
+                <div class="logo-sub">Kelly's Command Center</div>
+            </div>
+            <span class="live-badge" id="liveBadge">LIVE SESSION</span>
+        </div>
+        <div class="header-right">
+            <span id="clock"></span>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" onclick="showPage('dashboard')">Dashboard</div>
+        <div class="nav-item" onclick="showPage('schedule')">2026 Calendar</div>
+        <div class="nav-item" onclick="showPage('drivers')">Drivers</div>
+        <div class="nav-item" onclick="showPage('constructors')">Constructors</div>
+        <div class="nav-item" onclick="showPage('verstappen')">Max Zone</div>
+    </div>
+
+    <div class="main">
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+            <div class="next-race" id="nextRaceHero">
+                <div class="next-race-label">Next Race</div>
+                <div class="next-race-name" id="nextRaceName">Loading...</div>
+                <div class="next-race-circuit" id="nextRaceCircuit"></div>
+                <div class="countdown" id="countdown"></div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">Driver Standings</div>
+                    <div id="driverStandings"><div class="loading"><div class="spinner"></div><br>Loading standings...</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Constructor Standings</div>
+                    <div id="constructorStandings"><div class="loading"><div class="spinner"></div><br>Loading standings...</div></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Recent Results</div>
+                <div id="recentResults"><div class="loading"><div class="spinner"></div><br>Loading results...</div></div>
+            </div>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div class="page" id="page-schedule">
+            <div class="card">
+                <div class="card-title">2026 Race Calendar</div>
+                <div id="raceCalendar"><div class="loading"><div class="spinner"></div><br>Loading calendar...</div></div>
+            </div>
+        </div>
+
+        <!-- DRIVERS -->
+        <div class="page" id="page-drivers">
+            <div class="card">
+                <div class="card-title">2026 Driver Standings</div>
+                <div id="fullDriverStandings"><div class="loading"><div class="spinner"></div><br>Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- CONSTRUCTORS -->
+        <div class="page" id="page-constructors">
+            <div class="card">
+                <div class="card-title">2026 Constructor Standings</div>
+                <div id="fullConstructorStandings"><div class="loading"><div class="spinner"></div><br>Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- MAX ZONE -->
+        <div class="page" id="page-verstappen">
+            <div class="driver-hero">
+                <div class="driver-number">1</div>
+                <div class="driver-details">
+                    <h2>MAX VERSTAPPEN</h2>
+                    <div class="team">Red Bull Racing</div>
+                    <div class="driver-stats">
+                        <div>
+                            <div class="driver-stat-value">4</div>
+                            <div class="driver-stat-label">World Titles</div>
+                        </div>
+                        <div>
+                            <div class="driver-stat-value">63</div>
+                            <div class="driver-stat-label">Race Wins</div>
+                        </div>
+                        <div>
+                            <div class="driver-stat-value">40</div>
+                            <div class="driver-stat-label">Poles</div>
+                        </div>
+                        <div>
+                            <div class="driver-stat-value">33</div>
+                            <div class="driver-stat-label">Fastest Laps</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">2026 Season Stats</div>
+                <div id="maxStats"><div class="loading">Season hasn't started yet! First race: March 6-8 in Australia 🇦🇺</div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Career Records</div>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div class="stat-box-value">63</div>
+                        <div class="stat-box-label">Race Wins</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value">40</div>
+                        <div class="stat-box-label">Pole Positions</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value">111</div>
+                        <div class="stat-box-label">Podiums</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value">33</div>
+                        <div class="stat-box-label">Fastest Laps</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value">4</div>
+                        <div class="stat-box-label">Championships</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-value">19</div>
+                        <div class="stat-box-label">Wins in 2023</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Fun Facts</div>
+                <div class="fun-fact">"If you no longer go for a gap that exists, you are no longer a racing driver." — Ayrton Senna (Max's hero)</div>
+                <div class="fun-fact">Max became the youngest ever F1 race winner at 18 years, 228 days at the 2016 Spanish Grand Prix.</div>
+                <div class="fun-fact">His 19 wins in 2023 is the all-time single-season record. He won 10 races IN A ROW.</div>
+                <div class="fun-fact">Max is an avid sim racer and regularly competes in 24-hour virtual endurance races — sometimes during actual F1 race weekends.</div>
+                <div class="fun-fact">His father Jos Verstappen was also an F1 driver (1994-2003), and his mother Sophie Kumpen was a champion kart racer.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Team colors
+        const TEAM_COLORS = {
+            'Red Bull': '#1e41ff',
+            'Red Bull Racing': '#1e41ff',
+            'Ferrari': '#e8002d',
+            'McLaren': '#ff8000',
+            'Mercedes': '#27f4d2',
+            'Aston Martin': '#229971',
+            'Alpine': '#0093cc',
+            'Williams': '#64c4ff',
+            'RB': '#6692ff',
+            'Kick Sauber': '#52e252',
+            'Haas': '#b6babd',
+            'Cadillac': '#1f1f27',
+        };
+
+        // 2026 Calendar (from formula1.com)
+        const RACES_2026 = [
+            { round: 1, name: 'Australian Grand Prix', circuit: 'Albert Park, Melbourne', date: '2026-03-08', flag: '🇦🇺' },
+            { round: 2, name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', date: '2026-03-15', flag: '🇨🇳' },
+            { round: 3, name: 'Japanese Grand Prix', circuit: 'Suzuka Circuit', date: '2026-03-30', flag: '🇯🇵' },
+            { round: 4, name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2026-04-05', flag: '🇧🇭' },
+            { round: 5, name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2026-04-13', flag: '🇸🇦' },
+            { round: 6, name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2026-05-03', flag: '🇺🇸' },
+            { round: 7, name: 'Emilia Romagna Grand Prix', circuit: 'Imola', date: '2026-05-17', flag: '🇮🇹' },
+            { round: 8, name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', date: '2026-05-24', flag: '🇲🇨' },
+            { round: 9, name: 'Spanish Grand Prix', circuit: 'Circuit de Barcelona-Catalunya', date: '2026-06-01', flag: '🇪🇸' },
+            { round: 10, name: 'Canadian Grand Prix', circuit: 'Circuit Gilles Villeneuve, Montreal', date: '2026-06-15', flag: '🇨🇦' },
+            { round: 11, name: 'Austrian Grand Prix', circuit: 'Red Bull Ring', date: '2026-06-29', flag: '🇦🇹' },
+            { round: 12, name: 'British Grand Prix', circuit: 'Silverstone Circuit', date: '2026-07-06', flag: '🇬🇧' },
+            { round: 13, name: 'Belgian Grand Prix', circuit: 'Circuit de Spa-Francorchamps', date: '2026-07-27', flag: '🇧🇪' },
+            { round: 14, name: 'Hungarian Grand Prix', circuit: 'Hungaroring', date: '2026-08-02', flag: '🇭🇺' },
+            { round: 15, name: 'Dutch Grand Prix', circuit: 'Circuit Zandvoort', date: '2026-08-30', flag: '🇳🇱' },
+            { round: 16, name: 'Italian Grand Prix', circuit: 'Monza', date: '2026-09-06', flag: '🇮🇹' },
+            { round: 17, name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2026-09-20', flag: '🇦🇿' },
+            { round: 18, name: 'Singapore Grand Prix', circuit: 'Marina Bay Street Circuit', date: '2026-10-04', flag: '🇸🇬' },
+            { round: 19, name: 'United States Grand Prix', circuit: 'COTA, Austin', date: '2026-10-18', flag: '🇺🇸' },
+            { round: 20, name: 'Mexico City Grand Prix', circuit: 'Autódromo Hermanos Rodríguez', date: '2026-10-25', flag: '🇲🇽' },
+            { round: 21, name: 'São Paulo Grand Prix', circuit: 'Interlagos', date: '2026-11-08', flag: '🇧🇷' },
+            { round: 22, name: 'Las Vegas Grand Prix', circuit: 'Las Vegas Strip Circuit', date: '2026-11-22', flag: '🇺🇸' },
+            { round: 23, name: 'Qatar Grand Prix', circuit: 'Lusail International Circuit', date: '2026-11-29', flag: '🇶🇦' },
+            { round: 24, name: 'Abu Dhabi Grand Prix', circuit: 'Yas Marina Circuit', date: '2026-12-06', flag: '🇦🇪' },
+        ];
+
+        // Navigation
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Clock
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
+            });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Next Race & Countdown
+        function updateNextRace() {
+            const now = new Date();
+            const nextRace = RACES_2026.find(r => new Date(r.date + 'T14:00:00') > now);
+            
+            if (nextRace) {
+                document.getElementById('nextRaceName').textContent = nextRace.flag + ' ' + nextRace.name;
+                document.getElementById('nextRaceCircuit').textContent = nextRace.circuit + ' — Round ' + nextRace.round;
+                
+                const raceDate = new Date(nextRace.date + 'T14:00:00');
+                const diff = raceDate - now;
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                
+                document.getElementById('countdown').innerHTML = `
+                    <div class="countdown-item"><div class="countdown-number">${days}</div><div class="countdown-label">Days</div></div>
+                    <div class="countdown-item"><div class="countdown-number">${hours}</div><div class="countdown-label">Hours</div></div>
+                    <div class="countdown-item"><div class="countdown-number">${mins}</div><div class="countdown-label">Mins</div></div>
+                    <div class="countdown-item"><div class="countdown-number">${secs}</div><div class="countdown-label">Secs</div></div>
+                `;
+            }
+        }
+        setInterval(updateNextRace, 1000);
+        updateNextRace();
+
+        // Render Calendar
+        function renderCalendar() {
+            const now = new Date();
+            const html = RACES_2026.map(race => {
+                const raceDate = new Date(race.date);
+                const isPast = raceDate < now;
+                const isNext = !isPast && RACES_2026.find(r => new Date(r.date) > now)?.round === race.round;
+                const statusClass = isPast ? 'status-completed' : isNext ? 'status-next' : 'status-upcoming';
+                const statusText = isPast ? 'Completed' : isNext ? 'NEXT' : raceDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                return `
+                    <div class="race-item">
+                        <div class="race-round">R${race.round}</div>
+                        <div class="race-flag">${race.flag}</div>
+                        <div class="race-info">
+                            <div class="race-name">${race.name}</div>
+                            <div class="race-date">${race.circuit} — ${raceDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                        <span class="race-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('raceCalendar').innerHTML = html;
+        }
+
+        // Fetch OpenF1 data
+        async function fetchF1Data() {
+            try {
+                // Try to get latest session data
+                const sessionsRes = await fetch('https://api.openf1.org/v1/sessions?year=2026&session_type=Race');
+                const sessions = await sessionsRes.json();
+                
+                if (sessions.length > 0) {
+                    // We have race data!
+                    const latestSession = sessions[sessions.length - 1];
+                    
+                    // Get position data
+                    const posRes = await fetch(`https://api.openf1.org/v1/position?session_key=${latestSession.session_key}&position<=10`);
+                    const positions = await posRes.json();
+                    
+                    if (positions.length > 0) {
+                        renderResults(positions, latestSession);
+                    }
+                }
+            } catch (e) {
+                console.log('OpenF1 fetch error (season may not have started):', e);
+            }
+
+            // Try to get driver info from latest available session
+            try {
+                const driversRes = await fetch('https://api.openf1.org/v1/drivers?session_key=latest');
+                const drivers = await driversRes.json();
+                if (drivers.length > 0) {
+                    renderDrivers(drivers);
+                }
+            } catch (e) {
+                console.log('Driver fetch error:', e);
+            }
+        }
+
+        function renderDrivers(drivers) {
+            // Deduplicate by driver number
+            const seen = new Set();
+            const unique = drivers.filter(d => {
+                if (seen.has(d.driver_number)) return false;
+                seen.add(d.driver_number);
+                return true;
+            });
+            
+            // Sort by driver number
+            unique.sort((a, b) => a.driver_number - b.driver_number);
+        }
+
+        // Render pre-season standings placeholder
+        function renderPreSeasonStandings() {
+            const drivers = [
+                { name: 'Max Verstappen', team: 'Red Bull Racing', num: 1 },
+                { name: 'Liam Lawson', team: 'Red Bull Racing', num: 30 },
+                { name: 'Charles Leclerc', team: 'Ferrari', num: 16 },
+                { name: 'Lewis Hamilton', team: 'Ferrari', num: 44 },
+                { name: 'Lando Norris', team: 'McLaren', num: 4 },
+                { name: 'Oscar Piastri', team: 'McLaren', num: 81 },
+                { name: 'George Russell', team: 'Mercedes', num: 63 },
+                { name: 'Kimi Antonelli', team: 'Mercedes', num: 12 },
+                { name: 'Fernando Alonso', team: 'Aston Martin', num: 14 },
+                { name: 'Lance Stroll', team: 'Aston Martin', num: 18 },
+                { name: 'Pierre Gasly', team: 'Alpine', num: 10 },
+                { name: 'Jack Doohan', team: 'Alpine', num: 7 },
+                { name: 'Alex Albon', team: 'Williams', num: 23 },
+                { name: 'Carlos Sainz', team: 'Williams', num: 55 },
+                { name: 'Yuki Tsunoda', team: 'RB', num: 22 },
+                { name: 'Isack Hadjar', team: 'RB', num: 6 },
+                { name: 'Nico Hülkenberg', team: 'Kick Sauber', num: 27 },
+                { name: 'Gabriel Bortoleto', team: 'Kick Sauber', num: 5 },
+                { name: 'Esteban Ocon', team: 'Haas', num: 31 },
+                { name: 'Oliver Bearman', team: 'Haas', num: 87 },
+            ];
+
+            const constructors = [
+                { name: 'Red Bull Racing', color: '#1e41ff' },
+                { name: 'Ferrari', color: '#e8002d' },
+                { name: 'McLaren', color: '#ff8000' },
+                { name: 'Mercedes', color: '#27f4d2' },
+                { name: 'Aston Martin', color: '#229971' },
+                { name: 'Alpine', color: '#0093cc' },
+                { name: 'Williams', color: '#64c4ff' },
+                { name: 'RB', color: '#6692ff' },
+                { name: 'Kick Sauber', color: '#52e252' },
+                { name: 'Haas', color: '#b6babd' },
+            ];
+
+            // Driver standings (top 10 for sidebar)
+            const driverHtml = drivers.slice(0, 10).map((d, i) => `
+                <div class="standing-row">
+                    <div class="standing-pos ${i < 3 ? 'pos-' + (i+1) : ''}">${i + 1}</div>
+                    <div class="standing-color" style="background: ${TEAM_COLORS[d.team] || '#666'}"></div>
+                    <div class="standing-info">
+                        <div class="standing-name">${d.name}</div>
+                        <div class="standing-team">${d.team}</div>
+                    </div>
+                    <div><span class="standing-points">—</span><span class="standing-pts-label">PTS</span></div>
+                </div>
+            `).join('');
+
+            document.getElementById('driverStandings').innerHTML = driverHtml + 
+                '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.8rem;">Season starts March 8 in Australia 🇦🇺</div>';
+
+            // Full driver standings
+            const fullDriverHtml = drivers.map((d, i) => `
+                <div class="standing-row">
+                    <div class="standing-pos ${i < 3 ? 'pos-' + (i+1) : ''}">${i + 1}</div>
+                    <div class="standing-color" style="background: ${TEAM_COLORS[d.team] || '#666'}"></div>
+                    <div class="standing-info">
+                        <div class="standing-name">#${d.num} ${d.name}</div>
+                        <div class="standing-team">${d.team}</div>
+                    </div>
+                    <div><span class="standing-points">—</span><span class="standing-pts-label">PTS</span></div>
+                </div>
+            `).join('');
+            document.getElementById('fullDriverStandings').innerHTML = fullDriverHtml;
+
+            // Constructor standings
+            const constructorHtml = constructors.map((c, i) => `
+                <div class="standing-row">
+                    <div class="standing-pos ${i < 3 ? 'pos-' + (i+1) : ''}">${i + 1}</div>
+                    <div class="standing-color" style="background: ${c.color}"></div>
+                    <div class="standing-info">
+                        <div class="standing-name">${c.name}</div>
+                    </div>
+                    <div><span class="standing-points">—</span><span class="standing-pts-label">PTS</span></div>
+                </div>
+            `).join('');
+
+            document.getElementById('constructorStandings').innerHTML = constructorHtml +
+                '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.8rem;">Pre-season testing: Feb 18-20, Bahrain</div>';
+            document.getElementById('fullConstructorStandings').innerHTML = constructorHtml;
+
+            // Recent results placeholder
+            document.getElementById('recentResults').innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">🏁</div>
+                    <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">Pre-Season Testing in Progress</div>
+                    <div>Bahrain — February 11-13 & 18-20, 2026</div>
+                    <div style="margin-top: 1rem; color: var(--accent);">First race: Australian GP — March 8</div>
+                </div>
+            `;
+        }
+
+        // Init
+        renderCalendar();
+        renderPreSeasonStandings();
+        fetchF1Data();
+    </script>
+</body>
+</html>
