@@ -343,11 +343,11 @@ const KELLYS_CARD = [
   "Charles\nDNF 😭",
   "Max\n5x WDC",
   "Kimi\nTakes\nSomeone\nOut (DNF)",
-  "FREE:\nMax Talks\nSh*t About\nFIA",
+  "Max Talks\nSh*t About\nFIA",
   "Carlos\nPodium",
 ];
 
-const FREE_INDICES = [12, 23]; // positions that are free spaces
+const FREE_INDICES = [12]; // positions that are free spaces
 
 // Full pool of ideas (from the photo + extras)
 const IDEAS_POOL = [
@@ -520,7 +520,7 @@ function resetMarks() {
 
 function loadOriginal() {
   currentCard = [...KELLYS_CARD];
-  freeIndices = [12, 23];
+  freeIndices = [12];
   markedCells.clear();
   renderBoard();
 }
