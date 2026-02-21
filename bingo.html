@@ -320,7 +320,7 @@ const KELLYS_CARD = [
   "Charles\nRace Win",
   "Cristian\nHorner\nSpotted\nin Paddock",
   "Ferrari\nBlows\nStrategy",
-  "FREE:\nLando Says\nSomething\nAnnoying",
+  "Max/GP Radio\nFight",
 
   "Team\nDouble\nDNF",
   "Ollie\nBearman\nPodium",
@@ -342,12 +342,12 @@ const KELLYS_CARD = [
 
   "Charles\nDNF 😭",
   "Max\n5x WDC",
-  "Kimi\nDates\nSomeone\nOut",
+  "Kimi\nTakes\nSomeone\nOut (DNF)",
   "FREE:\nMax Talks\nSh*t About\nFIA",
   "Carlos\nPodium",
 ];
 
-const FREE_INDICES = [4, 12, 23]; // positions that are free spaces
+const FREE_INDICES = [12, 23]; // positions that are free spaces
 
 // Full pool of ideas (from the photo + extras)
 const IDEAS_POOL = [
@@ -520,7 +520,7 @@ function resetMarks() {
 
 function loadOriginal() {
   currentCard = [...KELLYS_CARD];
-  freeIndices = [...FREE_INDICES];
+  freeIndices = [12, 23];
   markedCells.clear();
   renderBoard();
 }
